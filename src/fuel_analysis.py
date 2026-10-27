@@ -1,7 +1,10 @@
+
 import pandas as pd
+from sklearn.ensemble import IsolationForest
 
 
 def calculate_fuel_metrics(df):
+    """Calculate fuel consumption in litres per 100 km."""
     result = df.copy()
 
     result["fuel_L_per_100km"] = float("nan")
@@ -9,6 +12,8 @@ def calculate_fuel_metrics(df):
     valid = (
         result["distance_km"].gt(0)
         & result["fuel_L"].ge(0)
+        & result["distance_km"].notna()
+        & result["fuel_L"].notna()
     )
 
     result.loc[valid, "fuel_L_per_100km"] = (
@@ -20,29 +25,66 @@ def calculate_fuel_metrics(df):
     return result
 
 
-from sklearn.ensemble import IsolationForest
+def detect_statistical_anomalies(df):
+    """Flag unusually high fuel consumption using the IQR rule."""
+    result = calculate_fuel_metrics(df)
 
-df = pd.read_csv("../data/dataset.csv")
-features = df[["distance_km", "fuel_L"]].copy()
+    values = result["fuel_L_per_100km"].dropna()
 
-valid = (
-    features["distance_km"].gt(0)
-    & features["fuel_L"].ge(0)
-    & features.notna().all(axis=1)
-)
+    result["statistical_anomaly"] = False
 
-model = IsolationForest(
-    n_estimators=100,
+    if len(values) < 4:
+        result["statistical_threshold"] = float("nan")
+        return result
+
+    q1 = values.quantile(0.25)
+    q3 = values.quantile(0.75)
+    iqr = q3 - q1
+
+    upper_threshold = q3 + 1.5 * iqr
+
+    result["statistical_threshold"] = upper_threshold
+
+    result["statistical_anomaly"] = (
+        result["fuel_L_per_100km"] > upper_threshold
+    ).fillna(False)
+
+    return result
+
+
+def detect_isolation_forest_anomalies(
+    df,
     contamination=0.05,
-    random_state=42
-)
+    random_state=42,
+):
+    """Flag unusual fuel-efficiency observations with Isolation Forest."""
+    result = calculate_fuel_metrics(df)
 
-df["fuel_anomaly"] = "Not evaluated"
+    result["isolation_forest_anomaly"] = "Not evaluated"
 
-df.loc[valid, "fuel_anomaly"] = (
-    model.fit_predict(features.loc[valid])
-)
+    valid = (
+        result["fuel_L_per_100km"].notna()
+        & result["fuel_L_per_100km"].ge(0)
+    )
 
-df["fuel_anomaly"] = df["fuel_anomaly"].map(
-    {-1: "Flagged", 1: "Normal"}
-).fillna(df["fuel_anomaly"])
+    if valid.sum() < 10:
+        return result
+
+    features = result.loc[
+        valid, ["fuel_L_per_100km"]
+    ].copy()
+
+    model = IsolationForest(
+        n_estimators=100,
+        contamination=contamination,
+        random_state=random_state,
+    )
+
+    predictions = model.fit_predict(features)
+
+    result.loc[valid, "isolation_forest_anomaly"] = [
+        "Flagged" if prediction == -1 else "Normal"
+        for prediction in predictions
+    ]
+
+    return result
