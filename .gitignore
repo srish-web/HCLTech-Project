@@ -1,0 +1,16 @@
+# Virtual Environments (Local python libraries)
+.venv/
+venv/
+ENV/
+env/
+
+# Python caching mechanisms
+**/__pycache__/
+*.py[cod]
+*$py.class
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Environment configurations (where credentials live)
+.env

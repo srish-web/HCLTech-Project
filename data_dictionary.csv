@@ -1,0 +1,10 @@
+column_name,data_type,sample_value_1,sample_value_2,sample_value_3,nullable,description_fill_in
+trip_id,object/string,TRP00001,TRP00002,TRP00003,No,Unique identifier assigned to each trip for tracking and managing individual delivery journeys.
+vehicle_id,object/string,VH032,VH010,VH018,No,Unique identifier of the vehicle assigned to a trip. Used to track vehicle utilization and trip assignments.
+driver_id,object/string,DRV002,DRV025,DRV050,No,Unique identifier of the driver assigned to a trip. Used to analyze driver performance and delivery outcomes.
+origin,object/string,Mumbai,Delhi,Bengaluru,No,Name of the city from which the trip or delivery journey begins.
+destination,object/string,Delhi,Pune,Delhi,No,Name of the city where the trip or delivery journey is intended to end.
+distance_km,float,64.6,776.1,1429.2,No,Total distance travelled during the trip measured in kilometres. Used for route analysis and operational efficiency assessment.
+fuel_L,float,77.4,17.0,121.4,No,Quantity of fuel consumed during the trip measured in litres. Used to evaluate fuel usage and vehicle efficiency.
+delivery_status,object/string,On_Time,On_Time,On_Time,No,Final delivery outcome indicating whether the delivery was completed on time, delayed, or failed.
+driver_score,integer,94,61,88,No,Numeric score representing driver performance on a scale from 60 to 100, where higher scores indicate better performance.
