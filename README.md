@@ -30,7 +30,8 @@ This project was developed as part of the HCLTech Career Shaper Programme. It an
    `streamlit run app.py`
 
 ## Dataset
-The dataset was provided by HCLTech for the project. Access and redistribution must follow the programme's applicable instructions.
+The dataset was provided by HCLTech for the project.
+The dataset.csv must be added to the data folder.
 
 ## Project Status
 The platform provides historical data analysis and dashboard-based insights. It does not currently implement live GPS tracking or live-traffic route optimization.
