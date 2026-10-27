@@ -14,3 +14,6 @@ env/
 
 # Environment configurations (where credentials live)
 .env
+
+#data
+data/dataset.csv
