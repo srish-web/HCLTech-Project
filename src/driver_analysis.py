@@ -40,25 +40,3 @@ def driver_score_summary(df):
 
 
 
-def compare_historical_routes(df):
-    """Compare recorded distances for repeated city pairs."""
-    result = df.copy()
-
-    result = result[
-        result["distance_km"].notna()
-        & result["distance_km"].gt(0)
-    ]
-
-    return (
-        result.groupby(
-            ["origin", "destination"],
-            as_index=False,
-        )
-        .agg(
-            trip_count=("trip_id", "count"),
-            average_distance_km=("distance_km", "mean"),
-            minimum_observed_distance_km=("distance_km", "min"),
-            maximum_observed_distance_km=("distance_km", "max"),
-        )
-        .sort_values("trip_count", ascending=False)
-    )

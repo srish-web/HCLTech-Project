@@ -71,3 +71,38 @@ def vehicle_trip_counts(df):
         .reset_index(name="trip_count")
         .sort_values("trip_count", ascending=False)
     )
+
+
+def compare_historical_routes(df):
+    """Summarize historical distances for each origin-destination pair."""
+    required = {"origin", "destination", "distance_km", "trip_id"}
+    missing = required - set(df.columns)
+
+    if missing:
+        raise ValueError(
+            f"Cannot compare historical routes. Missing columns: {sorted(missing)}"
+        )
+
+    result = df.copy()
+
+    result["distance_km"] = pd.to_numeric(
+        result["distance_km"], errors="coerce"
+    )
+
+    result = result[
+        result["distance_km"].notna()
+        & result["distance_km"].gt(0)
+        & result["origin"].notna()
+        & result["destination"].notna()
+    ]
+
+    return (
+        result.groupby(["origin", "destination"], as_index=False)
+        .agg(
+            trip_count=("trip_id", "count"),
+            average_distance_km=("distance_km", "mean"),
+            minimum_observed_distance_km=("distance_km", "min"),
+            maximum_observed_distance_km=("distance_km", "max"),
+        )
+        .sort_values("trip_count", ascending=False)
+    )
